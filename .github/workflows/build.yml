@@ -1,0 +1,72 @@
+name: "build"
+
+on:
+  pull_request:
+    branches:
+      - '*'
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Lint
+        run: helm lint ./charts/otf
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.8.0
+      - name: Test
+        run: |
+          helm install --debug -f ./charts/tofutf/test-values.yaml tofutf ./charts/tofutf --wait
+          helm test otf
+      - name: Debug
+        if: failure()
+        run: |
+          kubectl -n tofutf-test get all
+          kubectl -n tofutf-test describe pod
+          kubectl -n tofutf-test logs -l app.kubernetes.io/name=postgresql
+          kubectl -n tofutf-test logs -l app.kubernetes.io/name=tofutf
+
+  release:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: lint-test
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+      - name: Add dependency repos
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.4.1
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+  release-please:
+    needs: lint-test
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release-please.outputs.release_created }}
+      tag_name: ${{ steps.release-please.outputs.tag_name }} # e.g. v1.0.0
+      version: ${{ steps.release-please.outputs.version }} # e.g. 1.0.0
+    steps:
+      - uses: google-github-actions/release-please-action@v4
+        id: release-please
+        with:
+          release-type: helm
+          path: charts/keycloak-config-cli

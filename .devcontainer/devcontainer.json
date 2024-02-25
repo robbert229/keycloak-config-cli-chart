@@ -1,0 +1,26 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/go-postgres
+{
+	"name": "keycloak-config-cli",
+	"image": "mcr.microsoft.com/vscode/devcontainers/base:ubuntu-20.04",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"golang.go"
+			]
+		}
+	},
+	"features": {
+		"ghcr.io/robbert229/devcontainer-features/postgresql-client:1":{ "version":"14" },
+		"ghcr.io/robbert229/devcontainer-features/ko:1":{},
+		"ghcr.io/rio/features/k3d:1":{},
+		"ghcr.io/rio/features/k9s:1.1.5": {},
+		"ghcr.io/rio/features/skaffold:2":{},
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+		"ghcr.io/devcontainers/features/kubectl-helm-minikube:1":{}
+	},
+	"runArgs": [
+		"--network=host"
+	]
+}

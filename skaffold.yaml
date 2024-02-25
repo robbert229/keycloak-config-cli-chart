@@ -1,0 +1,22 @@
+apiVersion: skaffold/v4beta9
+kind: Config
+metadata:
+  name: keycloak-config-cli
+
+deploy:
+  helm:
+    releases:
+      - name: keycloak
+        remoteChart: oci://registry-1.docker.io/bitnamicharts/keycloak
+        version: 18.7.1
+        valuesFiles:
+          - hack/keycloak.yaml
+
+
+portForward:
+  - resourceType: service
+    resourceName: keycloak
+    namespace: default
+    port: 80
+    localPort: 8080
+    address: 0.0.0.0
