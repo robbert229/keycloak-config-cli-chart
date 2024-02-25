@@ -1,0 +1,6 @@
+apiVersion: v2
+name: .
+description: Deploys keycloak-config-cli to configure keycloak declaratively. 
+type: application
+version: "0.1.0"
+appVersion: "0.1.0"
