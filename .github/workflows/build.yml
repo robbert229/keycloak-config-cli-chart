@@ -19,20 +19,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Lint
-        run: helm lint ./charts/otf
+        run: helm lint ./charts/keycloak-config-cli
       - name: Create kind cluster
         uses: helm/kind-action@v1.8.0
       - name: Test
         run: |
-          helm install --debug -f ./charts/tofutf/test-values.yaml tofutf ./charts/tofutf --wait
-          helm test otf
+          helm install --debug -f ./charts/keycloak-config-cli/test-values.yaml keycloak-config-cli ./charts/keycloak-config-cli --wait
+          helm test keycloak-config-cli
       - name: Debug
         if: failure()
         run: |
-          kubectl -n tofutf-test get all
-          kubectl -n tofutf-test describe pod
-          kubectl -n tofutf-test logs -l app.kubernetes.io/name=postgresql
-          kubectl -n tofutf-test logs -l app.kubernetes.io/name=tofutf
+          kubectl -n keycloak-config-cli-test get all
+          kubectl -n keycloak-config-cli-test describe pod
+          kubectl -n keycloak-config-cli-test logs -l app.kubernetes.io/name=postgresql
+          kubectl -n keycloak-config-cli-test logs -l app.kubernetes.io/name=keycloak-config-cli
 
   release:
     if: ${{ github.ref == 'refs/heads/main' }}
